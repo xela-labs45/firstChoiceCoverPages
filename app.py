@@ -3,6 +3,7 @@ import os
 import io
 import zipfile
 from docx import Document
+from docx.shared import Pt
 from datetime import datetime
 
 # --- Configuration & Setup ---
@@ -13,16 +14,17 @@ st.set_page_config(page_title="Student Cover Page Generator", layout="wide")
 def replace_placeholder(doc, placeholder, replacement):
     """
     Replaces a placeholder in a python-docx Document object.
-    It searches in paragraphs and tables.
+    It searches in paragraphs and tables and applies specific styling:
+    Cambria (Body), Size 20.
     """
     # 1. Search in paragraphs
     for paragraph in doc.paragraphs:
         if placeholder in paragraph.text:
-            # Simple replacement - might lose formatting if run uses multiple elements
-            # Ideally, we iterate over runs, but for simple placeholders, this often suffices
-            # or we can use a more robust replacement strategy to preserve formatting.
-            # A common simple strategy:
-            paragraph.text = paragraph.text.replace(placeholder, str(replacement))
+            for run in paragraph.runs:
+                if placeholder in run.text:
+                    run.text = run.text.replace(placeholder, str(replacement))
+                    run.font.name = 'Cambria'
+                    run.font.size = Pt(20)
 
     # 2. Search in tables
     for table in doc.tables:
@@ -30,7 +32,11 @@ def replace_placeholder(doc, placeholder, replacement):
             for cell in row.cells:
                 for paragraph in cell.paragraphs:
                     if placeholder in paragraph.text:
-                        paragraph.text = paragraph.text.replace(placeholder, str(replacement))
+                        for run in paragraph.runs:
+                            if placeholder in run.text:
+                                run.text = run.text.replace(placeholder, str(replacement))
+                                run.font.name = 'Cambria'
+                                run.font.size = Pt(20)
 
 def generate_cover_pages(template_file, student_data, subjects):
     """
