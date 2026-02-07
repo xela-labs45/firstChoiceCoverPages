@@ -17,9 +17,14 @@ A Streamlit application to generate personalized cover pages for students based 
 ## Usage
 
 1.  **Template:**
-    - Place a `template.docx` file in this directory.
-    - OR use the upload feature in the app.
-    - Ensure the template has placeholders: `{{Name}}`, `{{Surname}}`, `{{Class}}`, `{{Year}}`, `{{Subject}}`.
+    - The app looks for a **School Standard Template** (`template.docx`) in this directory.
+    - Alternatively, you can upload your own **Local/Custom Template** via the UI.
+    - **Required Placeholders:** 
+        - `{{Name}}` (Name)
+        - `{{Surname}}` (Surname)
+        - `{{Class}}` (Class)
+        - `{{Year}}` (Year)
+        - `{{Subject}}` (Subject)
 
 2.  **Generate:**
     - Fill in student details.

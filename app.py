@@ -87,7 +87,7 @@ def generate_cover_pages(template_file, student_data, subjects):
 # --- Main App Interface ---
 
 def main():
-    st.title("🎓 Student Cover Page Generator")
+    st.title("🎓 First Choice Student Cover Page Generator")
     st.markdown("""
     Generate personalized cover pages for students based on a Word Document template.
     """)
@@ -107,20 +107,29 @@ def main():
     # 1. Template Selection
     st.subheader("1. Template Selection")
     
-    # Check for local 'template.docx'
-    local_template_path = "template.docx"
-    has_local_template = os.path.exists(local_template_path)
+    # Check for School Standard Template (template.docx)
+    standard_template_path = "template.docx"
+    has_standard_template = os.path.exists(standard_template_path)
     
     template_file = None
     
-    if has_local_template:
-        st.success(f"Found local template: `{local_template_path}`")
-        use_local = st.checkbox("Use local template?", value=True)
-        if use_local:
-            template_file = local_template_path
+    if has_standard_template:
+        st.success("✅ School Standard Template detected.")
+        use_standard = st.checkbox("Use School Standard Template?", value=True)
+        if use_standard:
+            template_file = standard_template_path
     
     if not template_file:
-        template_file = st.file_uploader("Upload a .docx template", type=["docx"])
+        with st.expander("ℹ️ Custom Template Requirements"):
+            st.markdown("""
+            If you upload your own template, ensure it contains the following placeholders exactly as shown (including double curly braces):
+            - `{{Name}}`: Student's First Name
+            - `{{Surname}}`: Student's Surname
+            - `{{Class}}`: Student's Class/Grade
+            - `{{Year}}`: Academic Year
+            - `{{Subject}}`: The Name of the Subject (a separate file is created for each subject)
+            """)
+        template_file = st.file_uploader("Upload your Local/Custom Template (.docx)", type=["docx"])
 
     if template_file:
         st.info("Template loaded successfully.")
