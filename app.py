@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import io
 from docx import Document
-from docx.enum.section import WD_SECTION
+from docxcompose.composer import Composer
 from docx.shared import Pt
 from datetime import datetime
 
@@ -41,12 +41,15 @@ def replace_placeholder(doc, placeholder, replacement):
 def generate_single_document(template_path, student_data, subjects):
     """
     Generates a single Word document containing all cover pages.
-    Each cover page is separated by a section break to preserve layout.
+    Uses docxcompose to append documents, ensuring formatting is preserved.
     """
     master_doc = None
-    
+    composer = None
+
     for i, subject in enumerate(subjects):
         # 1. Create a fresh document from template for this subject
+        # We need to reload the template file each time. 
+        # Since template_path is a path string here (based on current logic), it works directly.
         temp_doc = Document(template_path)
         
         # 2. Prepare replacements
@@ -65,20 +68,11 @@ def generate_single_document(template_path, student_data, subjects):
         if master_doc is None:
             # First subject sets the base for the master document
             master_doc = temp_doc
+            composer = Composer(master_doc)
         else:
-            # Add a section break to the master doc before appending new content
-            # This is crucial for preserving page borders and page size
-            master_doc.add_section(WD_SECTION.NEW_PAGE)
-            
-            # Copy content from temp_doc to master_doc
-            # We need to deep copy elements to avoid moving them
-            from copy import deepcopy
-            for element in temp_doc.element.body:
-                # Skip the section properties element which is always at the end of the body
-                if element.tag.endswith('sectPr'):
-                    continue
-                # Deep copy the element to avoid moving it
-                master_doc.element.body.append(deepcopy(element))
+            # Append the new document to the master using Composer
+            # docxcompose handles the section breaks and style merging automatically
+            composer.append(temp_doc)
 
     # Save to memory
     doc_buffer = io.BytesIO()
