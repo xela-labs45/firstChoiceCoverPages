@@ -14,17 +14,17 @@ st.set_page_config(page_title="Student Cover Page Generator", layout="wide")
 def replace_placeholder(doc, placeholder, replacement):
     """
     Replaces a placeholder in a python-docx Document object.
-    It searches in paragraphs and tables and applies specific styling:
-    Cambria (Body), Size 20.
+    It searches in paragraphs and tables.
+    This handles cases where placeholders might span multiple runs.
     """
     # 1. Search in paragraphs
     for paragraph in doc.paragraphs:
         if placeholder in paragraph.text:
-            for run in paragraph.runs:
-                if placeholder in run.text:
-                    run.text = run.text.replace(placeholder, str(replacement))
-                    run.font.name = 'Cambria'
-                    run.font.size = Pt(20)
+            # Replace in the entire paragraph text to handle multi-run placeholders
+            inline = paragraph._element
+            for child in inline:
+                if child.text and placeholder in child.text:
+                    child.text = child.text.replace(placeholder, str(replacement))
 
     # 2. Search in tables
     for table in doc.tables:
@@ -32,11 +32,11 @@ def replace_placeholder(doc, placeholder, replacement):
             for cell in row.cells:
                 for paragraph in cell.paragraphs:
                     if placeholder in paragraph.text:
-                        for run in paragraph.runs:
-                            if placeholder in run.text:
-                                run.text = run.text.replace(placeholder, str(replacement))
-                                run.font.name = 'Cambria'
-                                run.font.size = Pt(20)
+                        # Replace in the entire paragraph text
+                        inline = paragraph._element
+                        for child in inline:
+                            if child.text and placeholder in child.text:
+                                child.text = child.text.replace(placeholder, str(replacement))
 
 def generate_single_document(template_path, student_data, subjects):
     """
@@ -71,13 +71,14 @@ def generate_single_document(template_path, student_data, subjects):
             master_doc.add_section(WD_SECTION.NEW_PAGE)
             
             # Copy content from temp_doc to master_doc
-            # Note: python-docx doesn't have a native 'append' for documents,
-            # so we iterate through blocks (paragraphs and tables).
+            # We need to deep copy elements to avoid moving them
+            from copy import deepcopy
             for element in temp_doc.element.body:
                 # Skip the section properties element which is always at the end of the body
                 if element.tag.endswith('sectPr'):
                     continue
-                master_doc.element.body.append(element)
+                # Deep copy the element to avoid moving it
+                master_doc.element.body.append(deepcopy(element))
 
     # Save to memory
     doc_buffer = io.BytesIO()
