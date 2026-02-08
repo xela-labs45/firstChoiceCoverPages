@@ -17,8 +17,8 @@ A Streamlit application to generate personalized cover pages for students based 
 ## Usage
 
 1.  **Template:**
-    - The app looks for a **School Standard Template** (`template.docx`) in this directory.
-    - Alternatively, you can upload your own **Local/Custom Template** via the UI.
+    - The app **requires** the **School Standard Template** (`template.docx`) to be present in this directory.
+    - Custom template uploads are no longer supported to maintain brand consistency.
     - **Required Placeholders:** 
         - `{{Name}}` (Name)
         - `{{Surname}}` (Surname)

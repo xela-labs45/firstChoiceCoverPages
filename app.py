@@ -110,37 +110,20 @@ def main():
 
     # --- Main Area ---
     
-    # 1. Template Selection
-    st.subheader("1. Template Selection")
+    # 1. Template Verification
+    st.subheader("1. School Standard Template")
     
     # Check for School Standard Template (template.docx)
     standard_template_path = "template.docx"
     has_standard_template = os.path.exists(standard_template_path)
     
-    template_file = None
-    
     if has_standard_template:
-        st.success("✅ School Standard Template detected.")
-        use_standard = st.checkbox("Use School Standard Template?", value=True)
-        if use_standard:
-            template_file = standard_template_path
-    
-    if not template_file:
-        with st.expander("ℹ️ Custom Template Requirements"):
-            st.markdown("""
-            If you upload your own template, ensure it contains the following placeholders exactly as shown (including double curly braces):
-            - `{{Name}}`: Student's First Name
-            - `{{Surname}}`: Student's Surname
-            - `{{Class}}`: Student's Class/Grade
-            - `{{Year}}`: Academic Year
-            - `{{Subject}}`: The Name of the Subject (a separate file is created for each subject)
-            """)
-        template_file = st.file_uploader("Upload your Local/Custom Template (.docx)", type=["docx"])
-
-    if template_file:
-        st.info("Template loaded successfully.")
+        st.success("✅ School Standard Template detected and ready for use.")
+        template_file = standard_template_path
     else:
-        st.warning("Please verify a template is available.")
+        st.error("❌ CRITICAL ERROR: 'template.docx' (School Standard Template) not found!")
+        st.warning("Please ensure the standard template file is in the application directory to proceed.")
+        template_file = None
 
     # 2. Subject Selection
     st.subheader("2. Select Subjects")
