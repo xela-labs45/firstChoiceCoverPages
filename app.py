@@ -14,38 +14,65 @@ st.set_page_config(page_title="Student Cover Page Generator", layout="wide")
 def replace_placeholder(doc, placeholder, replacement):
     """
     Replaces a placeholder in a python-docx Document object.
-    Robust version: Tries run-level replacement first, falls back to paragraph-level.
+    Robust version: Tries run-level replacement first, falls back to paragraph-level
+    while attempting to preserve the original formatting of the placeholder.
     """
     replacement = str(replacement)
     
-    # 1. Search in paragraphs
-    for paragraph in doc.paragraphs:
-        if placeholder in paragraph.text:
-            # Attempt run-level replacement to preserve formatting
-            replaced_in_run = False
-            for run in paragraph.runs:
-                if placeholder in run.text:
-                    run.text = run.text.replace(placeholder, replacement)
-                    replaced_in_run = True
-            
-            # Fallback: If not replaced in runs (likely split across runs), replace entire text
-            # This might reset some specific formatting but ensures correct text
-            if not replaced_in_run:
-                paragraph.text = paragraph.text.replace(placeholder, replacement)
+    def replace_in_element(element):
+        for paragraph in element.paragraphs:
+            if placeholder in paragraph.text:
+                # Attempt run-level replacement to preserve formatting
+                replaced_in_run = False
+                for run in paragraph.runs:
+                    if placeholder in run.text:
+                        run.text = run.text.replace(placeholder, replacement)
+                        replaced_in_run = True
+                
+                # Fallback: If not replaced in runs (likely split across runs), replace entire text
+                # We capture the style from the first run to re-apply it
+                if not replaced_in_run:
+                    # Capture formatting
+                    font_name = None
+                    font_size = None
+                    bold = None
+                    italic = None
+                    underline = None
+                    color = None
+                    
+                    if paragraph.runs:
+                        r = paragraph.runs[0] # Assume first run carries the main style
+                        font_name = r.font.name
+                        font_size = r.font.size
+                        bold = r.bold
+                        italic = r.italic
+                        underline = r.underline
+                        try:
+                            color = r.font.color.rgb
+                        except:
+                            color = None
+                    
+                    # Replace text (this wipes runs and creates a new single run)
+                    paragraph.text = paragraph.text.replace(placeholder, replacement)
+                    
+                    # Re-apply formatting
+                    if paragraph.runs:
+                        new_run = paragraph.runs[0]
+                        if font_name: new_run.font.name = font_name
+                        if font_size: new_run.font.size = font_size
+                        if bold is not None: new_run.bold = bold
+                        if italic is not None: new_run.italic = italic
+                        if underline is not None: new_run.underline = underline
+                        if color: new_run.font.color.rgb = color
+
+    # 1. Search in body paragraphs
+    replace_in_element(doc)
 
     # 2. Search in tables
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
-                for paragraph in cell.paragraphs:
-                    if placeholder in paragraph.text:
-                        replaced_in_run = False
-                        for run in paragraph.runs:
-                            if placeholder in run.text:
-                                run.text = run.text.replace(placeholder, replacement)
-                                replaced_in_run = True
-                        if not replaced_in_run:
-                            paragraph.text = paragraph.text.replace(placeholder, replacement)
+                replace_in_element(cell)
 
 def generate_single_document(template_path, student_data, subjects):
     """
