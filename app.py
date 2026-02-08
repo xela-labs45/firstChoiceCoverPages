@@ -174,10 +174,14 @@ def main():
                 st.success(f"✅ Successfully generated {len(selected_subjects)} cover pages in a single file!")
                 
                 # Download Button
+                clean_name = "".join([c for c in f"{name}_{surname}" if c.isalnum() or c in (' ', '_', '-')]).strip().replace(' ', '_')
+                clean_class = "".join([c for c in student_class if c.isalnum() or c in (' ', '_', '-')]).strip().replace(' ', '_')
+                file_name = f"{clean_name}_{clean_class}_Cover_Pages.docx"
+                
                 st.download_button(
                     label="📥 Download Cover Pages (.docx)",
                     data=doc_buffer,
-                    file_name=f"{name}_{surname}_Cover_Pages.docx",
+                    file_name=file_name,
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 )
                 
