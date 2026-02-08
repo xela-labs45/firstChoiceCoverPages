@@ -1,33 +1,37 @@
-# Student Cover Page Generator
+# Student Cover Page Generator (First Choice)
 
-A Streamlit application to generate personalized cover pages for students based on a Word Document template.
+A professional Streamlit application designed to batch-generate personalized student cover pages from a single Word document template.
 
-## Setup
+## Use Case
+If a student needs cover pages for 10 different subjects, instead of manual typing, this app generates a single 10-page Word document with all student details and subject titles correctly filled in, ready for printing.
 
-1.  **Install Requirements:**
-    ```bash
-    pip install -r requirements.txt
-    ```
+## Setup Instructions
 
-2.  **Run the App:**
-    ```bash
-    streamlit run app.py
-    ```
+### 1. Requirements
+Ensure you have Python installed, then install the necessary libraries:
+```bash
+pip install streamlit python-docx docxcompose
+```
 
-## Usage
+### 2. The Template (`template.docx`)
+The application requires a file named `template.docx` in its root folder. This template acts as the design foundation. 
 
-1.  **Template:**
-    - The app **requires** the **School Standard Template** (`template.docx`) to be present in this directory.
-    - Custom template uploads are no longer supported to maintain brand consistency.
-    - **Required Placeholders:** 
-        - `{{Name}}` (Name)
-        - `{{Surname}}` (Surname)
-        - `{{Class}}` (Class)
-        - `{{Year}}` (Year)
-        - `{{Subject}}` (Subject)
+**Required Placeholders:**
+Use these exact tags in your Word document (including brackets):
+- `{{Name}}` - Inserts student's first name
+- `{{Surname}}` - Inserts student's surname
+- `{{Class}}` - Inserts student's class
+- `{{Year}}` - Inserts academic year
+- `{{Subject}}` - Inserts the subject title (one page per subject)
 
-2.  **Generate:**
-    - Fill in student details.
-    - Select subjects.
-    - Click "Generate Cover Pages".
-    - Download the resulting Word document (each subject on a new page).
+### 3. Running the App
+Launch the application by running:
+```bash
+streamlit run app.py
+```
+
+## Features
+- **Batch Processing:** Select multiple subjects to generate a single document.
+- **Style Preservation:** Automatically detects and re-applies the font style and size from your template placeholders.
+- **Print-Ready:** Uses section breaks and page breaks to ensure each cover page starts on a new sheet.
+- **Auto-Naming:** The downloaded file is automatically named using the student's name and class.
