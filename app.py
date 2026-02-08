@@ -6,27 +6,25 @@ from docxcompose.composer import Composer
 from docx.shared import Pt
 from datetime import datetime
 
-"""
-First Choice Student Cover Page Generator
-=========================================
-
-This application generates professional student cover pages from a Word (.docx) template.
-It allows for batch generation where multiple subjects are merged into a single 
-printable Word document, preserving formatting and layout for each page.
-
-TEMPLATE REQUIREMENTS:
-----------------------
-The application requires a 'template.docx' file in the same directory.
-The template must contain the following placeholders exactly as shown:
-- {{Name}}    : The student's first name
-- {{Surname}} : The student's surname
-- {{Class}}   : The student's class (e.g., Grade 10)
-- {{Year}}    : The academic year
-- {{Subject}} : The specific subject (one page is generated per subject)
-
-Note: The script is designed to preserve the font, size, and styling of these
-placeholders as defined in your Word template.
-"""
+# First Choice Student Cover Page Generator
+# =========================================
+#
+# This application generates professional student cover pages from a Word (.docx) template.
+# It allows for batch generation where multiple subjects are merged into a single 
+# printable Word document, preserving formatting and layout for each page.
+#
+# TEMPLATE REQUIREMENTS:
+# ----------------------
+# The application requires a 'template.docx' file in the same directory.
+# The template must contain the following placeholders exactly as shown:
+# - {{Name}}    : The student's first name
+# - {{Surname}} : The student's surname
+# - {{Class}}   : The student's class (e.g., Grade 10)
+# - {{Year}}    : The academic year
+# - {{Subject}} : The specific subject (one page is generated per subject)
+#
+# Note: The script is designed to preserve the font, size, and styling of these
+# placeholders as defined in your Word template.
 
 # --- Configuration & Setup ---
 st.set_page_config(page_title="Student Cover Page Generator", layout="wide")
