@@ -14,17 +14,24 @@ st.set_page_config(page_title="Student Cover Page Generator", layout="wide")
 def replace_placeholder(doc, placeholder, replacement):
     """
     Replaces a placeholder in a python-docx Document object.
-    It searches in paragraphs and tables.
-    This handles cases where placeholders might span multiple runs.
+    Robust version: Tries run-level replacement first, falls back to paragraph-level.
     """
+    replacement = str(replacement)
+    
     # 1. Search in paragraphs
     for paragraph in doc.paragraphs:
         if placeholder in paragraph.text:
-            # Replace in the entire paragraph text to handle multi-run placeholders
-            inline = paragraph._element
-            for child in inline:
-                if child.text and placeholder in child.text:
-                    child.text = child.text.replace(placeholder, str(replacement))
+            # Attempt run-level replacement to preserve formatting
+            replaced_in_run = False
+            for run in paragraph.runs:
+                if placeholder in run.text:
+                    run.text = run.text.replace(placeholder, replacement)
+                    replaced_in_run = True
+            
+            # Fallback: If not replaced in runs (likely split across runs), replace entire text
+            # This might reset some specific formatting but ensures correct text
+            if not replaced_in_run:
+                paragraph.text = paragraph.text.replace(placeholder, replacement)
 
     # 2. Search in tables
     for table in doc.tables:
@@ -32,11 +39,13 @@ def replace_placeholder(doc, placeholder, replacement):
             for cell in row.cells:
                 for paragraph in cell.paragraphs:
                     if placeholder in paragraph.text:
-                        # Replace in the entire paragraph text
-                        inline = paragraph._element
-                        for child in inline:
-                            if child.text and placeholder in child.text:
-                                child.text = child.text.replace(placeholder, str(replacement))
+                        replaced_in_run = False
+                        for run in paragraph.runs:
+                            if placeholder in run.text:
+                                run.text = run.text.replace(placeholder, replacement)
+                                replaced_in_run = True
+                        if not replaced_in_run:
+                            paragraph.text = paragraph.text.replace(placeholder, replacement)
 
 def generate_single_document(template_path, student_data, subjects):
     """
@@ -70,8 +79,9 @@ def generate_single_document(template_path, student_data, subjects):
             master_doc = temp_doc
             composer = Composer(master_doc)
         else:
-            # Append the new document to the master using Composer
-            # docxcompose handles the section breaks and style merging automatically
+            # Add a clear page break to the master document before appending
+            master_doc.add_page_break()
+            # Append the new document
             composer.append(temp_doc)
 
     # Save to memory
