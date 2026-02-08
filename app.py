@@ -1,8 +1,8 @@
 import streamlit as st
 import os
 import io
-import zipfile
 from docx import Document
+from docx.enum.section import WD_SECTION
 from docx.shared import Pt
 from datetime import datetime
 
@@ -38,57 +38,53 @@ def replace_placeholder(doc, placeholder, replacement):
                                 run.font.name = 'Cambria'
                                 run.font.size = Pt(20)
 
-def generate_cover_pages(template_file, student_data, subjects):
+def generate_single_document(template_path, student_data, subjects):
     """
-    Generates a zip file containing a cover page for each subject.
+    Generates a single Word document containing all cover pages.
+    Each cover page is separated by a section break to preserve layout.
+    """
+    master_doc = None
     
-    Args:
-        template_file: The template file (path or file-like object).
-        student_data (dict): Dictionary containing Name, Surname, Class, Year.
-        subjects (list): List of selected subjects.
+    for i, subject in enumerate(subjects):
+        # 1. Create a fresh document from template for this subject
+        temp_doc = Document(template_path)
         
-    Returns:
-        BytesIO: A bytes buffer containing the zip file.
-    """
-    zip_buffer = io.BytesIO()
+        # 2. Prepare replacements
+        replacements = {
+            "{{Name}}": student_data.get("Name", ""),
+            "{{Surname}}": student_data.get("Surname", ""),
+            "{{Class}}": student_data.get("Class", ""),
+            "{{Year}}": student_data.get("Year", ""),
+            "{{Subject}}": subject
+        }
+        
+        # 3. Perform replacements in temp_doc
+        for placeholder, value in replacements.items():
+            replace_placeholder(temp_doc, placeholder, value)
+            
+        if master_doc is None:
+            # First subject sets the base for the master document
+            master_doc = temp_doc
+        else:
+            # Add a section break to the master doc before appending new content
+            # This is crucial for preserving page borders and page size
+            master_doc.add_section(WD_SECTION.NEW_PAGE)
+            
+            # Copy content from temp_doc to master_doc
+            # Note: python-docx doesn't have a native 'append' for documents,
+            # so we iterate through blocks (paragraphs and tables).
+            for element in temp_doc.element.body:
+                # Skip the section properties element which is always at the end of the body
+                if element.tag.endswith('sectPr'):
+                    continue
+                master_doc.element.body.append(element)
 
-    with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-        for subject in subjects:
-            # Load the template FRESH for each subject to ensure clean slate
-            # If template_file is a file-like object (UploadedFile), we must seek(0)
-            if hasattr(template_file, 'seek'):
-                template_file.seek(0)
-            
-            doc = Document(template_file)
-            
-            # Prepare replacements
-            replacements = {
-                "{{Name}}": student_data.get("Name", ""),
-                "{{Surname}}": student_data.get("Surname", ""),
-                "{{Class}}": student_data.get("Class", ""),
-                "{{Year}}": student_data.get("Year", ""),
-                "{{Subject}}": subject
-            }
-            
-            # Perform replacements
-            for placeholder, value in replacements.items():
-                replace_placeholder(doc, placeholder, value)
-            
-            # Save the modified document to memory
-            doc_buffer = io.BytesIO()
-            doc.save(doc_buffer)
-            doc_buffer.seek(0)
-            
-            # Create a filename
-            safe_name = "".join([c for c in student_data.get("Name", "") if c.isalnum() or c in (' ', '_')]).strip()
-            safe_subject = "".join([c for c in subject if c.isalnum() or c in (' ', '_')]).strip()
-            filename = f"{safe_name}_{safe_subject}_Cover.docx"
-            
-            # Add to zip
-            zip_file.writestr(filename, doc_buffer.getvalue())
-
-    zip_buffer.seek(0)
-    return zip_buffer
+    # Save to memory
+    doc_buffer = io.BytesIO()
+    if master_doc:
+        master_doc.save(doc_buffer)
+    doc_buffer.seek(0)
+    return doc_buffer
 
 # --- Main App Interface ---
 
@@ -172,17 +168,17 @@ def main():
                     "Year": year
                 }
                 
-                # Generate Zip
-                zip_buffer = generate_cover_pages(template_file, student_data, selected_subjects)
+                # Generate Single Document
+                doc_buffer = generate_single_document(template_file, student_data, selected_subjects)
                 
-                st.success(f"✅ Successfully generated {len(selected_subjects)} cover pages!")
+                st.success(f"✅ Successfully generated {len(selected_subjects)} cover pages in a single file!")
                 
                 # Download Button
                 st.download_button(
-                    label="📥 Download Cover Pages (.zip)",
-                    data=zip_buffer,
-                    file_name="Cover_Pages.zip",
-                    mime="application/zip"
+                    label="📥 Download Cover Pages (.docx)",
+                    data=doc_buffer,
+                    file_name=f"{name}_{surname}_Cover_Pages.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 )
                 
             except Exception as e:

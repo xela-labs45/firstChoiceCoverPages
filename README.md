@@ -30,4 +30,4 @@ A Streamlit application to generate personalized cover pages for students based 
     - Fill in student details.
     - Select subjects.
     - Click "Generate Cover Pages".
-    - Download the ZIP file.
+    - Download the resulting Word document (each subject on a new page).
