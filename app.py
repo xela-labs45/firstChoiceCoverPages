@@ -202,7 +202,7 @@ def main():
         # School selection determines the template used
         school = st.radio("School", options=["Cambridge", "ZIMSEC"])
         
-        student_class = st.text_input("Class", placeholder="e.g., Grade 10A")
+        student_class = st.text_input("Class", placeholder="FORM 1A")
         
         current_year = datetime.now().year
         year = st.number_input("Year", min_value=2000, max_value=2100, value=current_year, step=1)
