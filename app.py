@@ -154,6 +154,30 @@ def generate_single_document(template_path, student_data, subjects):
                 master_doc.add_page_break()
                 composer.append(temp_doc)
 
+    # Add the general non-subject pages at the end
+    general_pages = ["JOTTER BOOK", "REMEDIAL LESSONS"]
+    for general_page in general_pages:
+        temp_doc = Document(template_path)
+        
+        replacements = {
+            "{{Name}}": student_data.get("Name", ""),
+            "{{Surname}}": student_data.get("Surname", ""),
+            "{{Class}}": student_data.get("Class", ""),
+            "{{Year}}": student_data.get("Year", ""),
+            "{{Subject}}": general_page
+        }
+        
+        for placeholder, value in replacements.items():
+            replace_placeholder(temp_doc, placeholder, value)
+            
+        if master_doc is None:
+            # Fallback if no subjects were selected (though UI validation prevents this)
+            master_doc = temp_doc
+            composer = Composer(master_doc)
+        else:
+            master_doc.add_page_break()
+            composer.append(temp_doc)
+
     # Save the final merged document to an in-memory buffer
     doc_buffer = io.BytesIO()
     if master_doc:
