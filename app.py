@@ -1,9 +1,9 @@
 import streamlit as st
 import os
 import io
+import traceback
 from docx import Document
 from docxcompose.composer import Composer
-from docx.shared import Pt
 from datetime import datetime
 
 # First Choice Student Cover Page Generator
@@ -110,7 +110,7 @@ def generate_single_document(template_path, student_data, subjects):
     master_doc = None
     composer = None
 
-    for i, subject in enumerate(subjects):
+    for subject in subjects:
         # Determine the list of sub-categories (pages) for this subject
         page_types = ["NOTES", "ASSIGNMENTS", "EXERCISE", "TEST"]
         
@@ -265,7 +265,14 @@ def main():
                 # Combine all pages into one file
                 doc_buffer = generate_single_document(template_file, student_data, selected_subjects)
                 
-                st.success(f"Generated {len(selected_subjects)} cover pages!")
+                # Count total pages: each subject generates 4 base types + subject-specific extras + 2 general pages
+                total_pages = sum(
+                    4 + (1 if s.upper() == "GEOGRAPHY" else
+                         2 if s.upper() in ("MATHEMATICS", "ENGLISH") else
+                         3 if s.upper() == "SHONA" else 0)
+                    for s in selected_subjects
+                ) + 2  # +2 for JOTTER BOOK and REMEDIAL LESSONS
+                st.success(f"✅ Generated {total_pages} cover pages across {len(selected_subjects)} subject(s)!")
                 
                 # Filename sanitization for the download
                 clean_name = "".join([c for c in f"{name}_{surname}" if c.isalnum() or c in (' ', '_', '-')]).replace(' ', '_')
@@ -281,7 +288,7 @@ def main():
                 
             except Exception as e:
                 st.error(f"Something went wrong: {e}")
-                # Optional: st.write(traceback.format_exc()) for debugging
+                st.code(traceback.format_exc())  # Shows full error trace for debugging
 
 if __name__ == "__main__":
     main()
