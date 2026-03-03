@@ -187,11 +187,11 @@ def main():
 
     st.subheader("2. Subject Selection")
     
-    # Pre-defined list of common subjects
+    # Pre-defined list of common subjects (Alphabetical Order)
     DEFAULT_SUBJECTS = [
-        "Mathematics", "Science", "English", "History", "Geography", 
-        "Art", "Physics", "Chemistry", "Biology", "Computer Science",
-        "Physical Education", "Music", "Drama", "Economics"
+        "AGRICULTURE", "ARTIFICIAL INTELLIGENCE", "B.E.S", "CHINESE", 
+        "COMBINED SCIENCE", "COMPUTER SCIENCE", "ENGLISH", "FRENCH", 
+        "GEOGRAPHY", "HERITAGE STUDIES", "HISTORY", "MATHEMATICS", "SHONA"
     ]
     
     selected_subjects = st.multiselect("Select subjects for the cover pages:", options=DEFAULT_SUBJECTS)
