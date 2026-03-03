@@ -13,9 +13,12 @@ Ensure you have Python installed, then install the necessary libraries:
 pip install streamlit python-docx docxcompose
 ```
 
-### 2. The Template (`template.docx`)
-The application requires a file named `template.docx` in its root folder. This template acts as the design foundation. 
+### 2. The Templates
+The application requires two template files in its root folder, depending on the selected school:
+- `template_cambridge.docx` - Used when Cambridge is selected
+- `template_zimsec.docx` - Used when ZIMSEC is selected
 
+These templates act as the design foundation for their respective schools. 
 **Required Placeholders:**
 Use these exact tags in your Word document (including brackets):
 - `{{Name}}` - Inserts student's first name

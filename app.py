@@ -15,7 +15,8 @@ from datetime import datetime
 #
 # TEMPLATE REQUIREMENTS:
 # ----------------------
-# The application requires a 'template.docx' file in the same directory.
+# The application requires two template files in the same directory:
+# 'template_cambridge.docx' and 'template_zimsec.docx'.
 # The template must contain the following placeholders exactly as shown:
 # - {{Name}}    : The student's first name
 # - {{Surname}} : The student's surname
@@ -155,6 +156,10 @@ def main():
         st.header("Student Details")
         name = st.text_input("Name", placeholder="First Name")
         surname = st.text_input("Surname", placeholder="Surname")
+        
+        # School selection determines the template used
+        school = st.radio("School", options=["Cambridge", "ZIMSEC"])
+        
         student_class = st.text_input("Class", placeholder="e.g., Grade 10A")
         
         current_year = datetime.now().year
@@ -164,16 +169,20 @@ def main():
     
     st.subheader("1. Template Status")
     
-    # Verify the School Standard Template is present
-    standard_template_path = "template.docx"
+    # Determine the template based on selected school
+    if school == "Cambridge":
+        standard_template_path = "template_cambridge.docx"
+    else:
+        standard_template_path = "template_zimsec.docx"
+        
     has_standard_template = os.path.exists(standard_template_path)
     
     if has_standard_template:
-        st.success("✅ School Standard Template ('template.docx') detected.")
+        st.success(f"✅ Template for {school} ('{standard_template_path}') detected.")
         template_file = standard_template_path
     else:
-        st.error("❌ ERROR: 'template.docx' not found in the app folder.")
-        st.info("To use this app, please place your Word template named 'template.docx' in the same folder as this script.")
+        st.error(f"❌ ERROR: '{standard_template_path}' not found in the app folder.")
+        st.info(f"To use this app for {school}, please place your Word template named '{standard_template_path}' in the same folder as this script.")
         template_file = None
 
     st.subheader("2. Subject Selection")
@@ -199,7 +208,7 @@ def main():
     if st.button("Generate & Prepare Download", type="primary"):
         # Basic validation to prevent errors
         if not template_file:
-            st.error("Cannot proceed without 'template.docx'.")
+            st.error(f"Cannot proceed without '{standard_template_path}'.")
             return
             
         if not name or not surname:
