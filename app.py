@@ -167,25 +167,17 @@ def main():
 
     # --- Main Area: Preparation ---
     
-    st.subheader("1. Template Status")
-    
-    # Determine the template based on selected school
+    # Determine the template based on selected school (Logic runs in background)
     if school == "Cambridge":
         standard_template_path = "template_cambridge.docx"
     else:
         standard_template_path = "template_zimsec.docx"
         
     has_standard_template = os.path.exists(standard_template_path)
-    
-    if has_standard_template:
-        st.success(f"✅ Template for {school} ('{standard_template_path}') detected.")
-        template_file = standard_template_path
-    else:
-        st.error(f"❌ ERROR: '{standard_template_path}' not found in the app folder.")
-        st.info(f"To use this app for {school}, please place your Word template named '{standard_template_path}' in the same folder as this script.")
-        template_file = None
+    template_file = standard_template_path if has_standard_template else None
 
-    st.subheader("2. Subject Selection")
+    # --- Main Area Display ---
+    st.subheader("1. Select Subjects")
     
     # Pre-defined list of common subjects (Alphabetical Order)
     DEFAULT_SUBJECTS = [
@@ -203,7 +195,7 @@ def main():
         selected_subjects.extend(custom_list)
         selected_subjects = list(set(selected_subjects)) # Remove duplicates
 
-    st.subheader("3. Final Step")
+    st.subheader("2. Final Step")
     
     if st.button("Generate & Prepare Download", type="primary"):
         # Basic validation to prevent errors
