@@ -111,30 +111,48 @@ def generate_single_document(template_path, student_data, subjects):
     composer = None
 
     for i, subject in enumerate(subjects):
-        # Create a fresh copy of the template for this specific subject
-        temp_doc = Document(template_path)
+        # Determine the list of sub-categories (pages) for this subject
+        page_types = ["NOTES", "ASSIGNMENTS", "EXERCISE", "TEST"]
         
-        # Mapping data to placeholders
-        replacements = {
-            "{{Name}}": student_data.get("Name", ""),
-            "{{Surname}}": student_data.get("Surname", ""),
-            "{{Class}}": student_data.get("Class", ""),
-            "{{Year}}": student_data.get("Year", ""),
-            "{{Subject}}": subject
-        }
-        
-        # Process replacements for this individual page
-        for placeholder, value in replacements.items():
-            replace_placeholder(temp_doc, placeholder, value)
+        # Add subject-specific extra pages
+        upper_subject = subject.upper()
+        if upper_subject == "GEOGRAPHY":
+            page_types.append("PRACTISEBOOK")
+        elif upper_subject == "MATHEMATICS":
+            page_types.extend(["WORKSHEET 1", "WORKSHEET 2"])
+        elif upper_subject == "ENGLISH":
+            page_types.extend(["COMPREHENSION", "COMPOSITION"])
+        elif upper_subject == "SHONA":
+            page_types.extend(["NZWISISO", "RONDEDZERO", "MUTAURO"])
             
-        if master_doc is None:
-            # The first document becomes the 'base' for the file
-            master_doc = temp_doc
-            composer = Composer(master_doc)
-        else:
-            # Force a new page and append the next subject's cover
-            master_doc.add_page_break()
-            composer.append(temp_doc)
+        for page_type in page_types:
+            # Create a fresh copy of the template for this specific page
+            temp_doc = Document(template_path)
+            
+            # The subject label becomes Subject + Page Type (e.g., "ENGLISH NOTES")
+            subject_label = f"{subject} {page_type}"
+            
+            # Mapping data to placeholders
+            replacements = {
+                "{{Name}}": student_data.get("Name", ""),
+                "{{Surname}}": student_data.get("Surname", ""),
+                "{{Class}}": student_data.get("Class", ""),
+                "{{Year}}": student_data.get("Year", ""),
+                "{{Subject}}": subject_label
+            }
+            
+            # Process replacements for this individual page
+            for placeholder, value in replacements.items():
+                replace_placeholder(temp_doc, placeholder, value)
+                
+            if master_doc is None:
+                # The first document becomes the 'base' for the file
+                master_doc = temp_doc
+                composer = Composer(master_doc)
+            else:
+                # Force a new page and append the next subject's cover
+                master_doc.add_page_break()
+                composer.append(temp_doc)
 
     # Save the final merged document to an in-memory buffer
     doc_buffer = io.BytesIO()
